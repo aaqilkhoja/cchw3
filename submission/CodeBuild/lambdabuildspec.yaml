@@ -1,0 +1,13 @@
+version: 0.2
+
+phases:
+
+  build:
+    commands:
+      - cd index-photos-LF1 && zip -r index-photos-LF1.zip .
+      - cd search-photos-LF2 && zip -r search-photos-LF2.zip .
+
+  post_build:
+    commands:
+      - aws lambda update-function-code --function-name index-photos-LF1 --zip-file fileb://index-photos-LF1.zip
+      - aws lambda update-function-code --function-name search-photos-LF2 --zip-file fileb://search-photos-LF2.zip

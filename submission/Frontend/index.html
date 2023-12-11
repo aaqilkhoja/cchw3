@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>CCHW3</title>
+    <style>
+        /* Your CSS styles */
+    </style>
+    <!-- Include third-party libraries and AWS API Gateway SDK -->
+    <script type="text/javascript" src="lib/axios/dist/axios.standalone.js"></script>
+    <script type="text/javascript" src="lib/CryptoJS/rollups/hmac-sha256.js"></script>
+    <script type="text/javascript" src="lib/CryptoJS/rollups/sha256.js"></script>
+    <script type="text/javascript" src="lib/CryptoJS/components/hmac.js"></script>
+    <script type="text/javascript" src="lib/CryptoJS/components/enc-base64.js"></script>
+    <script type="text/javascript" src="lib/url-template/url-template.js"></script>
+    <script type="text/javascript" src="lib/apiGatewayCore/sigV4Client.js"></script>
+    <script type="text/javascript" src="lib/apiGatewayCore/apiGatewayClient.js"></script>
+    <script type="text/javascript" src="lib/apiGatewayCore/simpleHttpClient.js"></script>
+    <script type="text/javascript" src="lib/apiGatewayCore/utils.js"></script>
+    <script type="text/javascript" src="apigClient.js"></script>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.410.0.min.js"></script>
+</head>
+<body>
+    <h1>AI Photo Search</h1>
+
+    <!-- Search Form -->
+    <div>
+        <input type="text" id="searchQuery" placeholder="Enter search query" />
+        <button onclick="searchPhotos()">Search</button>
+    </div>
+
+    <!-- Search Results -->
+    <div id="searchResults">
+        <!-- Search results will be displayed here -->
+    </div>
+
+    <!-- Upload Form -->
+    <div>
+        <input type="file" id="fileUpload" />
+        <input type="text" id="customLabels" placeholder="Enter custom labels (comma-separated)" />
+        <button onclick="uploadPhoto()">Upload</button>
+    </div>
+    <script>
+        // Initialize the AWS API Gateway SDK
+        var apigClient = apigClientFactory.newClient({
+            // Configuration options if needed
+        });
+
+        function searchPhotos() {
+            var query = document.getElementById('searchQuery').value;
+            // Make an API request to GET /search
+
+            fetch('https://mmdqw7r746.execute-api.us-east-1.amazonaws.com/cchw3-apistage/search?q=' + query)
+                .then(response => response.json())
+                .then(data => displaySearchResults(data))
+                .catch(error => console.error('Error:', error));
+        }
+
+function displaySearchResults(data) {
+    var resultsDiv = document.getElementById('searchResults');
+    resultsDiv.innerHTML = ''; // Clear previous results
+    data.results.forEach(photo => {
+        var img = document.createElement('img');
+
+        // Assuming the URL is in the format "http://[wrong-bucket-name].s3.amazonaws.com/path/to/image.jpg"
+        // Replace '[wrong-bucket-name]' with 'cc-hw3-b2'
+        var correctBucketUrl = "https://cc-hw3-b2.s3.amazonaws.com/" + photo.url
+        
+        // console.log(photo.url);
+        // console.log(correctBucketUrl);
+        img.src = correctBucketUrl;
+        img.alt = "Search Result Image"; 
+        // Reshape the img to 1/4 size
+        img.width = 200;
+        img.height = 200;
+        resultsDiv.appendChild(img);
+    });
+}
+
+        function uploadPhoto() {
+            var file = document.getElementById('fileUpload').files[0];
+            console.log(document.getElementById('fileUpload'))
+            console.log(file);
+            var customLabels = document.getElementById('customLabels').value;
+
+            console.log(customLabels);
+
+            // Make a PUT API request to /upload in AWS API Gateway
+            // Remember to add the file to the request body and file name to the PUT request 
+            // The API Gateway endpoint URL is https://mmdqw7r746.execute-api.us-east-1.amazonaws.com/cchw3-apistage/upload
+            
+            var api_key = "zeIfE8e8E15tOQ0XS805H6cSjZFIwA5d4RS0i7ei"
+            console.log(api_key)
+             fetch('https://mmdqw7r746.execute-api.us-east-1.amazonaws.com/cchw3-apistage/upload?key='+file.name, {
+                method: 'PUT',
+                body: file,
+                headers: {
+                    'x-api-key': api_key,
+                    //"X-Amz-Meta-CustomLabels": customLabels,
+                    "Content-Type": "image/png"
+                }
+            })
+
+            // print to the HTML page that file is uploaded
+            var uploadDiv = document.getElementById('searchResults');
+            uploadDiv.innerHTML = ''; // Clear previous results
+            var uploadText = document.createElement('p');
+            uploadText.innerHTML = "File Uploaded!";
+            uploadDiv.appendChild(uploadText);
+
+        }
+    </script>
+</body>
+</html>
+
